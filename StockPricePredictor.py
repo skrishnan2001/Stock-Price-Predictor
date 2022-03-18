@@ -3,38 +3,35 @@ from datetime import date
 import yfinance as yf
 from fbprophet import Prophet
 from fbprophet.plot import plot_plotly
-import pandas as pd
 from plotly import graph_objs as go
 
-
-def listOfStockSymbols():
-    yahooTickers = pd.read_csv('dataset/Yahoo Ticker Symbols.csv')
-    symbols = yahooTickers['Ticker'].tolist()
-    return symbols
 
 def isLeapYear(y):
     if (y % 4 == 0 and y % 100 != 0) or (y % 400 == 0):
         return True
     return False
 
+
 def sideBarHelper(text):
-    st.sidebar.markdown(text)
+    st.sidebar.text(text)
+
 
 def populateSideBar():
     st.sidebar.image(selection.info["logo_url"])
-    st.sidebar.subheader(selection.info['shortName'])
+    st.sidebar.header(selection.info['shortName'])
     sideBarHelper("Sector: " + selection.info['sector'])
     sideBarHelper("Financial Currency: " + selection.info['financialCurrency'])
     sideBarHelper("Exchange: " + selection.info['exchange'])
 
     st.sidebar.json({
-        "Exchange Time Zone" : selection.info['exchangeTimezoneName'],
-        "Current Price" : selection.info['currentPrice'],
-        "Previous Close" : selection.info['previousClose'],
-        "Day Low" : selection.info['dayLow'],
-        "Day High" : selection.info['dayHigh']
+        "Exchange Time Zone": selection.info['exchangeTimezoneName'],
+        "Current Price": selection.info['currentPrice'],
+        "Previous Close": selection.info['previousClose'],
+        "Open": selection.info['open'],
+        "Day Low": selection.info['dayLow'],
+        "Day High": selection.info['dayHigh'],
+        "Volume": selection.info['volume']
     })
-
 
 
 START = "2015-01-01"
@@ -43,16 +40,10 @@ year = int(TODAY[: 4])
 
 st.title('Stock Forecast App')
 
-# stocks = listOfStockSymbols()
-stock = st.sidebar.text_input("Symbol", value='AAPL', max_chars=8)
-# selected_stock = st.selectbox('Select dataset for prediction', stocks)
-
-stockSymbols = listOfStockSymbols()
-
-if stock not in stockSymbols:
-    st.error('This company is not listed !')
-
-else:
+try:
+    stock = st.sidebar.text_input("Symbol", value='AAPL')
+    # selected_stock = st.selectbox('Select dataset for prediction', stocks)
+    # stocks = listOfStockSymbols()
     selected_stock = stock
 
     selection = yf.Ticker(selected_stock)
@@ -94,6 +85,14 @@ else:
         fig.layout.update(title_text='Time Series data with Rangeslider', xaxis_rangeslider_visible=True)
         st.plotly_chart(fig)
 
+        fig = go.Figure()
+        lastFiveDays = data.tail(10)
+        fig.add_trace(go.Candlestick(x=lastFiveDays['Date'], open=lastFiveDays['Open'], high=lastFiveDays['High'],
+                                     low=lastFiveDays['Low'],
+                                     close=lastFiveDays['Close']))
+        fig.layout.update(title_text='Candle Stick Chart - Last 10 Days Trend', xaxis_rangeslider_visible=True)
+        st.plotly_chart(fig)
+
 
     plot_raw_data()
 
@@ -114,6 +113,9 @@ else:
     fig1 = plot_plotly(m, forecast)
     st.plotly_chart(fig1)
 
-    st.write("Forecast components")
+    st.write("Forecast components - Yearly, Daily and Monthly Trends")
     fig2 = m.plot_components(forecast)
     st.write(fig2)
+
+except:
+    st.error('This company is not listed !')
