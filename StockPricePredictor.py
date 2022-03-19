@@ -33,14 +33,24 @@ def stockPricesToday():
                   }
 
     df = pd.DataFrame(today_data)
+    # priceChangeToday = selection.info['currentPrice'] - data['Close'][len(data) - 1]  # Current Price - Previous Closing
+    col1, col2 = st.columns(2)
+    priceChangeToday = selection.info['currentPrice'] - selection.info['open']  # Current Price - Previous Closing
+    col1.metric(label="Current Price, Change w.r.t Opening Price", value=selection.info['currentPrice'],
+                delta='%.2f' % priceChangeToday)
+
+    priceChangeYesterday = data['Close'][len(data) - 1] - data['Close'][len(data) - 2] if len(data) >= 2 else 0
+    col2.metric(label="Previous Closing, Previous Day Change", value=selection.info['currentPrice'],
+                delta='%.2f' % priceChangeYesterday)
+
     st.dataframe(df)
 
 
 @st.cache
 def load_data(ticker):
-    data = yf.download(ticker, START, TODAY)
-    data.reset_index(inplace=True)
-    return data
+    historicData = yf.download(ticker, START, TODAY)
+    historicData.reset_index(inplace=True)
+    return historicData
 
 
 def plot_raw_data():
@@ -129,5 +139,8 @@ try:
     if option == 'Predict Stock Price':
         # Predicting the forecast with Prophet.
         predictingTheStockPrices()
-except:
+except KeyError:
     st.error('This company is not listed !')
+
+except FileNotFoundError:
+    st.error('No data is available about this stock !')
