@@ -92,9 +92,23 @@ def predictingTheStockPrices():
     df_train = data[['Date', 'Close']]
     df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
 
-    m = Prophet()
+    model_param = {
+        "daily_seasonality": False,
+        "weekly_seasonality": False,
+        "yearly_seasonality": True,
+        "seasonality_mode": "multiplicative",
+        "growth": "logistic"
+    }
+
+    m = Prophet(**model_param)
+
+    m = m.add_seasonality(name="monthly", period=30, fourier_order=10)
+    m = m.add_seasonality(name="quarterly", period=92.25, fourier_order=10)
+
+    df_train['cap'] = df_train["y"].max() + df_train["y"].std() * 0.05
     m.fit(df_train)
     future = m.make_future_dataframe(periods=period)
+    future['cap'] = df_train['cap'].max()
     forecast = m.predict(future)
 
     # Showing and plotting the forecast
@@ -105,7 +119,7 @@ def predictingTheStockPrices():
     fig1 = plot_plotly(m, forecast)
     st.plotly_chart(fig1)
 
-    st.write("Forecast components - Yearly, Daily and Monthly Trends")
+    st.write("Forecast components - Yearly, Monthly and Quarterly Trends")
     fig2 = m.plot_components(forecast)
     st.write(fig2)
 
