@@ -36,11 +36,11 @@ def stockPricesToday():
     # priceChangeToday = selection.info['currentPrice'] - data['Close'][len(data) - 1]  # Current Price - Previous Closing
     col1, col2 = st.columns(2)
     priceChangeToday = selection.info['currentPrice'] - selection.info['open']  # Current Price - Previous Closing
-    col1.metric(label="Current Price, Change w.r.t Opening Price", value=selection.info['currentPrice'],
+    col1.metric(label="Current Price, Change w.r.t Opening Price", value='%.2f' % selection.info['currentPrice'],
                 delta='%.2f' % priceChangeToday)
 
     priceChangeYesterday = data['Close'][len(data) - 1] - data['Close'][len(data) - 2] if len(data) >= 2 else 0
-    col2.metric(label="Previous Closing, Previous Day Change", value=selection.info['currentPrice'],
+    col2.metric(label="Previous Closing, Previous Day Change", value='%.2f' % data['Close'][len(data) - 1],
                 delta='%.2f' % priceChangeYesterday)
 
     st.dataframe(df)
