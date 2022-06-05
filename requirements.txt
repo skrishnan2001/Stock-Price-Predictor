@@ -6,4 +6,5 @@ streamlit==1.4.0
 yfinance==0.1.69
 click==8
 pandas~=1.0.4
+requests~=2.27.1
 datetime~=4.4
