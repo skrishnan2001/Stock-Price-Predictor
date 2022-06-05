@@ -5,6 +5,39 @@ from fbprophet import Prophet
 from fbprophet.plot import plot_plotly
 import pandas as pd
 from plotly import graph_objs as go
+import requests
+import config
+import constants
+import json
+
+API_KEY = config.NEWS_API_KEY
+countries = constants.countries
+
+
+def business_news_feed():
+    select_country = st.sidebar.selectbox("Select Country: ", countries.keys())
+    st.header('NEWS FEED')
+    r = requests.get('https://newsapi.org/v2/top-headlines?country=' + countries[
+        select_country] + '&category=business&apikey=' + API_KEY)
+    data_news = json.loads(r.content)
+    length = min(15, len(data_news['articles']))
+    for i in range(length):
+        news = data_news['articles'][i]['title']
+        st.subheader(news)
+
+        image = data_news['articles'][i]['urlToImage']
+        try:
+            st.image(image)
+        except:
+            pass
+        else:
+            pass
+
+        content = data_news['articles'][i]['content']
+        st.write(content)
+
+        url = data_news['articles'][i]['url']
+        st.write(url)
 
 
 def isLeapYear(y):
@@ -132,7 +165,8 @@ year = int(TODAY[: 4])
 st.title('STOCK FORECAST APP')
 
 try:
-    option = st.sidebar.selectbox("Which Dashboard?", ('Past Trends', 'Predict Stock Price'), 0)
+    option = st.sidebar.selectbox("Which Dashboard?", ('Past Trends', 'Predict Stock Price', 'Trending Business News'),
+                                  0)
     stock = st.sidebar.text_input("Symbol", value='GOOG')
     # selected_stock = st.selectbox('Select dataset for prediction', stocks)
     # stocks = listOfStockSymbols()
@@ -141,18 +175,24 @@ try:
     data = load_data(selected_stock)
 
     selection = yf.Ticker(selected_stock)
-    company_name = selection.info['longName']
-    st.subheader(company_name + "'s Stocks")
-
-    populateSideBar()
 
     if option == 'Past Trends':
+        company_name = selection.info['longName']
+        st.subheader(company_name + "'s Stocks")
+        populateSideBar()
         pastTrends()
         plot_raw_data()
 
     if option == 'Predict Stock Price':
         # Predicting the forecast with Prophet.
+        company_name = selection.info['longName']
+        st.subheader(company_name + "'s Stocks")
+        populateSideBar()
         predictingTheStockPrices()
+
+    if option == 'Trending Business News':
+        business_news_feed()
+
 except KeyError:
     st.error('This company is not listed !')
 
