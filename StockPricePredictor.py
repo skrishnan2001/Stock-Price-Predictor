@@ -6,7 +6,7 @@ from fbprophet.plot import plot_plotly
 import pandas as pd
 from plotly import graph_objs as go
 import requests
-import config
+#import config
 import constants
 import json
 
