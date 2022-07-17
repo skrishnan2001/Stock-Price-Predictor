@@ -1,4 +1,4 @@
-# Stock-Price-Predictor
+# Stockify : The Stock Forecast App
 ML based web-app that can predict the price of the stocks of a company for the next 4 years
 
 ## Project Overview
