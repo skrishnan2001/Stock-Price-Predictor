@@ -121,9 +121,7 @@ def predictingTheStockPrices():
             period += 366
         else:
             period += 365
-            
-    data['Date'].dt.tz_localize(None)
-    
+                
     df_train = data[['Date', 'Close']]
     df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
 
@@ -204,8 +202,8 @@ except FileNotFoundError:
 except TypeError:
     st.error('No data is available about this stock !')
 
-# except ValueError:
-#     st.error('Symbol cannot be empty !')
+except ValueError:
+    st.error('Symbol cannot be empty !')
 
 except ConnectionError:
     st.error('Could not connect to the internet :(')
