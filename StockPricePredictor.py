@@ -202,8 +202,8 @@ except FileNotFoundError:
 except TypeError:
     st.error('No data is available about this stock !')
 
-except ValueError:
-    st.error('Symbol cannot be empty !')
+# except ValueError:
+#     st.error('Symbol cannot be empty !')
 
 except ConnectionError:
     st.error('Could not connect to the internet :(')
