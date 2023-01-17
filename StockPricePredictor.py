@@ -122,8 +122,8 @@ def predictingTheStockPrices():
         else:
             period += 365
             
-    data['Date'] = pd.to_datetime(data.Date)
-
+    data['Date'].dt.tz_localize(None)
+    
     df_train = data[['Date', 'Close']]
     df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
 
