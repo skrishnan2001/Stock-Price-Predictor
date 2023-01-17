@@ -124,6 +124,8 @@ def predictingTheStockPrices():
                 
     df_train = data[['Date', 'Close']]
     df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
+    
+    df_train['ds'] = df_train['ds'].dt.tz_convert(None)
 
     model_param = {
         "daily_seasonality": False,
