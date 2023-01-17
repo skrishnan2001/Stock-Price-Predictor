@@ -3,7 +3,7 @@ pystan==2.19.1.1
 fbprophet==0.7.1
 plotly==5.5.0
 streamlit==1.10.0
-yfinance==0.1.93
+yfinance==0.2.4
 click==8
 pandas>=1.0.4
 requests~=2.27.1
