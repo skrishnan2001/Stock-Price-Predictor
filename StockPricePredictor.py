@@ -54,7 +54,7 @@ def populateSideBar():
     sideBarHelper("Sector: " + selection.info['sector'])
     sideBarHelper("Financial Currency: " + selection.info['financialCurrency'])
     #sideBarHelper("Exchange: " + selection.info['exchange'])
-    sideBarHelper("Timezone: " + selection.info['exchangeTimezoneName'])
+    #sideBarHelper("Timezone: " + selection.info['exchangeTimezoneName'])
 
 
 def stockPricesToday():
