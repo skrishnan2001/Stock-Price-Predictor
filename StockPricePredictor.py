@@ -53,7 +53,7 @@ def populateSideBar():
     st.sidebar.header(selection.info['shortName'])
     sideBarHelper("Sector: " + selection.info['sector'])
     sideBarHelper("Financial Currency: " + selection.info['financialCurrency'])
-    sideBarHelper("Exchange: " + selection.info['exchange'])
+    #sideBarHelper("Exchange: " + selection.info['exchange'])
     sideBarHelper("Timezone: " + selection.info['exchangeTimezoneName'])
 
 
