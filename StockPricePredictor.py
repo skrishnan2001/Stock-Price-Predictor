@@ -53,8 +53,8 @@ def populateSideBar():
     st.sidebar.header(selection.info['shortName'])
     sideBarHelper("Sector: " + selection.info['sector'])
     sideBarHelper("Financial Currency: " + selection.info['financialCurrency'])
-    #sideBarHelper("Exchange: " + selection.info['exchange'])
-    #sideBarHelper("Timezone: " + selection.info['exchangeTimezoneName'])
+    sideBarHelper("Exchange: " + selection.info['exchange'])
+    sideBarHelper("Timezone: " + selection.info['exchangeTimezoneName'])
 
 
 def stockPricesToday():
@@ -201,8 +201,8 @@ except KeyError:
 except FileNotFoundError:
     st.error('No data is available about this stock !')
 
-# except TypeError:
-#     st.error('No data is available about this stock !')
+except TypeError:
+    st.error('No data is available about this stock !')
 
 except ValueError:
     st.error('Symbol cannot be empty !')
