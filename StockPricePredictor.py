@@ -201,8 +201,8 @@ except KeyError:
 except FileNotFoundError:
     st.error('No data is available about this stock !')
 
-except TypeError:
-    st.error('No data is available about this stock !')
+# except TypeError:
+#     st.error('No data is available about this stock !')
 
 except ValueError:
     st.error('Symbol cannot be empty !')
