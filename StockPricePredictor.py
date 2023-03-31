@@ -1,12 +1,12 @@
 import streamlit as st
 from datetime import date
-import yfinance as yf
+from yahooquery import Ticker
 from fbprophet import Prophet
 from fbprophet.plot import plot_plotly
 import pandas as pd
 from plotly import graph_objs as go
-import requests
 #import config
+import requests
 import constants
 import json
 
@@ -49,39 +49,47 @@ def sideBarHelper(text):
 
 
 def populateSideBar():
-    st.sidebar.image(selection.info["logo_url"])
-    st.sidebar.header(selection.info['shortName'])
-    sideBarHelper("Sector: " + selection.info['sector'])
-    sideBarHelper("Financial Currency: " + selection.info['financialCurrency'])
-    sideBarHelper("Exchange: " + selection.info['exchange'])
-    sideBarHelper("Timezone: " + selection.info['exchangeTimezoneName'])
+    # st.sidebar.image(selection.summary_detail[selected_stock]['logo_url'])
+    st.sidebar.header(selection.price[selected_stock]['shortName'])
+    sideBarHelper(
+        "Sector: " + selection.summary_profile[selected_stock]['sector'])
+    sideBarHelper("Financial Currency: " +
+                  selection.financial_data[selected_stock]['financialCurrency'])
+    sideBarHelper(
+        "Exchange: " + selection.price[selected_stock]['exchangeName'])
+    sideBarHelper(
+        "Timezone: " + selection.quote_type[selected_stock]['timeZoneFullName'])
+    url = selection.asset_profile[selected_stock]['website']
+    st.sidebar.markdown("[Visit website](%s)" % url)
+    st.sidebar.success(
+        selection.financial_data[selected_stock]['recommendationKey'].capitalize())
 
 
 def stockPricesToday():
-    today_data = {'Current Price': [selection.info['currentPrice']],
-                  'Previous Close': [selection.info['previousClose']],
-                  'Open': [selection.info['open']],
-                  'Day Low': [selection.info['dayLow']],
-                  'Day High': [selection.info['dayHigh']]
+    today_data = {'Current Price': [selection.financial_data[selected_stock]['currentPrice']],
+                  'Previous Close': [selection.summary_detail[selected_stock]['regularMarketPreviousClose']],
+                  'Open': [selection.summary_detail[selected_stock]['open']],
+                  'Day Low': [selection.summary_detail[selected_stock]['dayLow']],
+                  'Day High': [selection.summary_detail[selected_stock]['dayHigh']]
                   }
 
     df = pd.DataFrame(today_data)
-    # priceChangeToday = selection.info['currentPrice'] - data['Close'][len(data) - 1]  # Current Price - Previous Closing
     col1, col2 = st.columns(2)
-    priceChangeToday = selection.info['currentPrice'] - selection.info['open']  # Current Price - Previous Closing
-    col1.metric(label="Current Price, Change w.r.t Opening Price", value='%.2f' % selection.info['currentPrice'],
+    priceChangeToday = selection.financial_data[selected_stock]['currentPrice'] - \
+        selection.summary_detail[selected_stock]['open']  # Current Price - Previous Closing
+    col1.metric(label="Current Price, Change w.r.t Opening Price", value='%.2f' % selection.financial_data[selected_stock]['currentPrice'],
                 delta='%.2f' % priceChangeToday)
 
-    priceChangeYesterday = data['Close'][len(data) - 1] - data['Close'][len(data) - 2] if len(data) >= 2 else 0
-    col2.metric(label="Previous Closing, Previous Day Change", value='%.2f' % data['Close'][len(data) - 1],
+    priceChangeYesterday = data['close'][len(
+        data) - 1] - data['close'][len(data) - 2] if len(data) >= 2 else 0
+    col2.metric(label="Previous Closing, Previous Day Change", value='%.2f' % data['close'][len(data) - 1],
                 delta='%.2f' % priceChangeYesterday)
 
     st.dataframe(df)
 
 
-@st.cache
-def load_data(ticker):
-    historicData = yf.download(ticker, START, TODAY)
+def load_data(_ticker):
+    historicData = _ticker.history(interval='1d', start=START, end=TODAY)
     historicData.reset_index(inplace=True)
     return historicData
 
@@ -89,22 +97,27 @@ def load_data(ticker):
 def plot_raw_data():
     # Plotting the raw data
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=data['Date'], y=data['Open'], name="stock_open"))
-    fig.add_trace(go.Scatter(x=data['Date'], y=data['Close'], name="stock_close"))
-    fig.layout.update(title_text='Time Series data with Rangeslider', xaxis_rangeslider_visible=True)
+    fig.add_trace(go.Scatter(x=data['date'],
+                  y=data['open'], name="stock_open"))
+    fig.add_trace(go.Scatter(x=data['date'],
+                  y=data['close'], name="stock_close"))
+    fig.layout.update(
+        title_text='Time Series data with Rangeslider', xaxis_rangeslider_visible=True)
     st.plotly_chart(fig)
 
     fig = go.Figure()
-    lastFiveDays = data.tail(10)
-    fig.add_trace(go.Candlestick(x=lastFiveDays['Date'], open=lastFiveDays['Open'], high=lastFiveDays['High'],
-                                 low=lastFiveDays['Low'],
-                                 close=lastFiveDays['Close']))
-    fig.layout.update(title_text='Candle Stick Chart - Last 10 Days Trend', xaxis_rangeslider_visible=True)
+    lastThirtyDays = data.tail(30)
+    fig.add_trace(go.Candlestick(x=lastThirtyDays['date'], open=lastThirtyDays['open'], high=lastThirtyDays['high'],
+                                 low=lastThirtyDays['low'],
+
+                                 close=lastThirtyDays['close']))
+    fig.layout.update(
+        title_text='Candle Stick Chart - Past 30 Days Trend', xaxis_rangeslider_visible=True)
     st.plotly_chart(fig)
 
 
 def pastTrends():
-    st.info(selection.info['longBusinessSummary'])
+    st.info(selection.asset_profile[selected_stock]['longBusinessSummary'])
     st.subheader('Today')
     stockPricesToday()
 
@@ -121,11 +134,9 @@ def predictingTheStockPrices():
             period += 366
         else:
             period += 365
-                
-    df_train = data[['Date', 'Close']]
-    df_train = df_train.rename(columns={"Date": "ds", "Close": "y"})
-    
-    df_train['ds'] = df_train['ds'].dt.tz_convert(None)
+
+    df_train = data[['date', 'close']]
+    df_train = df_train.rename(columns={"date": "ds", "close": "y"})
 
     model_param = {
         "daily_seasonality": False,
@@ -160,26 +171,23 @@ def predictingTheStockPrices():
 
 
 # Driver
-START = "2015-01-01"
+START = "2016-01-01"
 TODAY = date.today().strftime("%Y-%m-%d")
 year = int(TODAY[: 4])
 
-st.title('STOCK FORECAST APP')
+st.title('STOCKIFY: STOCK FORECAST APP')
 
 try:
     option = st.sidebar.selectbox("Which Dashboard?", ('Past Trends', 'Predict Stock Price', 'Trending Business News'),
                                   0)
-    stock = st.sidebar.text_input("Symbol", value='GOOG')
-    # selected_stock = st.selectbox('Select dataset for prediction', stocks)
-    # stocks = listOfStockSymbols()
+    stock = st.sidebar.text_input("Symbol", value='C')
     selected_stock = stock
 
-    data = load_data(selected_stock)
-
-    selection = yf.Ticker(selected_stock)
+    selection = Ticker(selected_stock)
+    data = load_data(selection)
 
     if option == 'Past Trends':
-        company_name = selection.info['longName']
+        company_name = selection.price[selected_stock]['longName']
         st.subheader(company_name + "'s Stocks")
         populateSideBar()
         pastTrends()
@@ -187,7 +195,7 @@ try:
 
     if option == 'Predict Stock Price':
         # Predicting the forecast with Prophet.
-        company_name = selection.info['longName']
+        company_name = selection.price[selected_stock]['longName']
         st.subheader(company_name + "'s Stocks")
         populateSideBar()
         predictingTheStockPrices()
