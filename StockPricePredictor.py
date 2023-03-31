@@ -180,7 +180,7 @@ st.title('STOCKIFY: STOCK FORECAST APP')
 try:
     option = st.sidebar.selectbox("Which Dashboard?", ('Past Trends', 'Predict Stock Price', 'Trending Business News'),
                                   0)
-    stock = st.sidebar.text_input("Symbol", value='C')
+    stock = st.sidebar.text_input("Symbol", value='GOOG')
     selected_stock = stock
 
     selection = Ticker(selected_stock)
@@ -206,11 +206,11 @@ try:
 except KeyError:
     st.error('This company is not listed !')
 
-# except FileNotFoundError:
-#     st.error('No data is available about this stock !')
+except FileNotFoundError:
+    st.error('No data is available about this stock !')
 
-# except TypeError:
-#     st.error('No data is available about this stock !')
+except TypeError:
+    st.error('No data is available about this stock !')
 
 except ValueError:
     st.error('Symbol cannot be empty !')
