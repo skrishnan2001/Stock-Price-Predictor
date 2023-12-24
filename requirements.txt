@@ -5,7 +5,7 @@ plotly==5.5.0
 streamlit==1.29.0
 click==8
 pandas>=1.0.4
-requests~=2.27.1
+requests>=2.31.0
 datetime~=4.4
 holidays==0.13
 pytz>=2022.5
