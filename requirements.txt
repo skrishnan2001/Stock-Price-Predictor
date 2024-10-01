@@ -7,7 +7,7 @@ click==8
 pandas>=1.0.4
 requests>=2.31.0
 datetime~=4.4
-holidays==0.24
+holidays>=0.25
 pytz>=2022.5
 spyder==5.5.0
 yahooquery==2.3.7
